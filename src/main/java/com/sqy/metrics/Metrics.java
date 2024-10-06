@@ -7,10 +7,7 @@ public record Metrics(
     double lossFunctionValue
 ) {
     public String formatMetrics() {
-        return "Metrics{" + "accuracy=" + accuracy
-               + ", precision=" + precision
-               + ", recall=" + recall
-               + ", lossFunctionValue=" + lossFunctionValue
-               + '}';
+        return "Metrics{accuracy=%.2f, precision=%.2f , recall=%.2f , lossFunctionValue=%.2f}"
+            .formatted(accuracy, precision, recall, lossFunctionValue);
     }
 }

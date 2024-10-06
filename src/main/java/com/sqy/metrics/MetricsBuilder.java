@@ -37,6 +37,7 @@ public class MetricsBuilder {
         truePositive = 0;
         falseNegative = 0;
         falsePositive = 0;
+        lossFunctionValue = 0;
         return this;
     }
 
