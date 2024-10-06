@@ -1,4 +1,4 @@
-package com.sqy.test;
+package com.sqy.core;
 
 import java.util.*;
 
@@ -34,16 +34,8 @@ public class Neuron {
         for (int i = 0; i < weights.length; i++) {
             z += weights[i] * inputs[i];
         }
-        output = sigmoid(z);
+        output = activationFunction.apply(z);
         return output;
-    }
-
-    private double sigmoid(double x) {
-        return 1.0 / (1.0 + Math.exp(-x));
-    }
-
-    private double sigmoidDerivative() {
-        return output * (1 - output);
     }
 
     public void computeOutputDelta(double target) {
@@ -55,7 +47,7 @@ public class Neuron {
         for (Neuron neuron : nextLayerNeurons) {
             sum += neuron.getWeights()[index] * neuron.getDelta();
         }
-        delta = sum * sigmoidDerivative();
+        delta = sum * activationFunction.applyDerivative(output);
     }
 
     public void updateWeights(double[] inputs, double learningRate) {

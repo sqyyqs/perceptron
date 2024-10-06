@@ -1,4 +1,4 @@
-package com.sqy.test;
+package com.sqy.domain;
 
 public record InputData(
     double[] data,

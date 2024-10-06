@@ -1,13 +1,23 @@
-package com.sqy.test;
+package com.sqy.core;
 
 import java.util.*;
 
-public class MLP {
+import com.sqy.domain.ClassLabelMapping;
+import com.sqy.domain.InputData;
+import com.sqy.loss.LossFunction;
+
+public class MultiLayerPerceptron {
     private final List<Layer> layers = new ArrayList<>();
     private final double learningRate;
+    private final LossFunction lossFunction;
 
-    public MLP(int inputSize, int[] hiddenLayerSizes, int outputSize, double learningRate) {
+    public MultiLayerPerceptron(int inputSize,
+                                int[] hiddenLayerSizes,
+                                int outputSize,
+                                double learningRate,
+                                LossFunction lossFunction) {
         this.learningRate = learningRate;
+        this.lossFunction = lossFunction;
 
         int previousSize = inputSize;
         for (int size : hiddenLayerSizes) {
@@ -59,13 +69,7 @@ public class MLP {
     private double computeLoss(int targetLabel) {
         Layer outputLayer = layers.getLast();
         double[] predicted = outputLayer.getOutputs();
-
-        double loss = 0.0;
-        for (int i = 0; i < predicted.length; i++) {
-            double target = (i == targetLabel) ? 1.0 : 0.0;
-            loss -= target * Math.log(predicted[i] + 1e-15) + (1 - target) * Math.log(1 - predicted[i] + 1e-15);
-        }
-        return loss;
+        return lossFunction.calculateLoss(predicted, targetLabel);
     }
 
     public int predict(double[] inputs) {

@@ -1,4 +1,4 @@
-package com.sqy;
+package com.sqy.metrics;
 
 public class Metrics {
     public static double accuracy(int[] predictions, int[] actual) {

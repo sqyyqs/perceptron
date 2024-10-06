@@ -1,11 +1,15 @@
-package com.sqy.test;
+package com.sqy;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.sqy.MatrixCsvLoader;
+import com.sqy.configuration.MultiLayerPerceptronConfiguration;
+import com.sqy.core.MultiLayerPerceptron;
+import com.sqy.util.MatrixCsvLoader;
+import com.sqy.domain.ClassLabelMapping;
+import com.sqy.domain.InputData;
 
-public class Main {
+public class MultiLayerPerceptronRunner {
     public static void main(String[] args) {
         int inputSize = 32 * 32;
         int[] hiddenLayerSizes = { 128, 64 };
@@ -13,7 +17,8 @@ public class Main {
         double learningRate = 0.2;
         int epochs = 10;
 
-        MLP mlp = new MLP(inputSize, hiddenLayerSizes, outputSize, learningRate);
+        MultiLayerPerceptron mlp = new MultiLayerPerceptron(inputSize, hiddenLayerSizes, outputSize, learningRate,
+            MultiLayerPerceptronConfiguration.defaultLossFunction);
 
         List<InputData> dataSet = loadTrainingInputs();
         mlp.train(dataSet, epochs);

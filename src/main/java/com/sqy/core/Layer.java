@@ -1,8 +1,8 @@
-package com.sqy.test;
+package com.sqy.core;
 
 import java.util.*;
 
-import com.sqy.activasion.SigmoidActivationFunctionFunction;
+import com.sqy.configuration.MultiLayerPerceptronConfiguration;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +20,7 @@ public class Layer {
         this.outputSize = outputSize;
         neurons = new ArrayList<>();
         for (int i = 0; i < outputSize; i++) {
-            neurons.add(new Neuron(inputSize, new SigmoidActivationFunctionFunction()));
+            neurons.add(new Neuron(inputSize, MultiLayerPerceptronConfiguration.defaultActivationFunction));
         }
     }
 
