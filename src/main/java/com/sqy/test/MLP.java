@@ -50,13 +50,16 @@ public class MLP {
                 double[] inputs = inputData.data();
                 double[] outputs = forward(inputs);
                 backpropagate(ClassLabelMapping.from(inputData), inputs);
-                totalLoss += computeLoss(outputs, ClassLabelMapping.from(inputData));
+                totalLoss += computeLoss(ClassLabelMapping.from(inputData));
             }
             System.out.println("Epoch " + epoch + " - Loss: " + (totalLoss / dataset.size()));
         }
     }
 
-    private double computeLoss(double[] predicted, int targetLabel) {
+    private double computeLoss(int targetLabel) {
+        Layer outputLayer = layers.getLast();
+        double[] predicted = outputLayer.getOutputs();
+
         double loss = 0.0;
         for (int i = 0; i < predicted.length; i++) {
             double target = (i == targetLabel) ? 1.0 : 0.0;
