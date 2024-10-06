@@ -2,6 +2,13 @@ package com.sqy.test;
 
 import java.util.*;
 
+import com.sqy.activasion.SigmoidActivationFunctionFunction;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Layer {
     private int inputSize;
     private int outputSize;
@@ -13,7 +20,7 @@ public class Layer {
         this.outputSize = outputSize;
         neurons = new ArrayList<>();
         for (int i = 0; i < outputSize; i++) {
-            neurons.add(new Neuron(inputSize));
+            neurons.add(new Neuron(inputSize, new SigmoidActivationFunctionFunction()));
         }
     }
 
@@ -40,37 +47,5 @@ public class Layer {
 
     public void updateWeights(double[] inputs, double learningRate) {
         neurons.forEach(neuron -> neuron.updateWeights(inputs, learningRate));
-    }
-
-    public int getInputSize() {
-        return inputSize;
-    }
-
-    public void setInputSize(final int inputSize) {
-        this.inputSize = inputSize;
-    }
-
-    public int getOutputSize() {
-        return outputSize;
-    }
-
-    public void setOutputSize(final int outputSize) {
-        this.outputSize = outputSize;
-    }
-
-    public List<Neuron> getNeurons() {
-        return neurons;
-    }
-
-    public void setNeurons(final List<Neuron> neurons) {
-        this.neurons = neurons;
-    }
-
-    public double[] getOutputs() {
-        return outputs;
-    }
-
-    public void setOutputs(final double[] outputs) {
-        this.outputs = outputs;
     }
 }

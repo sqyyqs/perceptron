@@ -10,7 +10,7 @@ public class Main {
         int inputSize = 32 * 32;
         int[] hiddenLayerSizes = { 128, 64 };
         int outputSize = 10;
-        double learningRate = 0.1;
+        double learningRate = 0.2;
         int epochs = 10;
 
         MLP mlp = new MLP(inputSize, hiddenLayerSizes, outputSize, learningRate);

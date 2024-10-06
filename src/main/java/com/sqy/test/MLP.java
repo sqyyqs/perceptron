@@ -48,7 +48,7 @@ public class MLP {
             Collections.shuffle(dataset);
             for (InputData inputData : dataset) {
                 double[] inputs = inputData.data();
-                double[] outputs = forward(inputs);
+                forward(inputs);
                 backpropagate(ClassLabelMapping.from(inputData), inputs);
                 totalLoss += computeLoss(ClassLabelMapping.from(inputData));
             }

@@ -1,7 +1,7 @@
 package com.sqy;
 
-import com.sqy.activasion.Activation;
-import com.sqy.activasion.SigmoidActivationFunction;
+import com.sqy.activasion.ActivationFunction;
+import com.sqy.activasion.SigmoidActivationFunctionFunction;
 
 public class Layer {
 
@@ -12,7 +12,7 @@ public class Layer {
     private double[][] input;
     private double[][] output;
     private double[][] delta;
-    private Activation activation = new SigmoidActivationFunction();
+    private ActivationFunction activationFunction = new SigmoidActivationFunctionFunction();
 
     public Layer(int inputSize, int outputSize) {
         this.inputSize = inputSize;

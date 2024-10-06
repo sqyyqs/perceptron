@@ -2,6 +2,8 @@ package com.sqy.test;
 
 import java.util.*;
 
+import com.sqy.activasion.ActivationFunction;
+
 public class Neuron {
     private int inputSize;
     private double[] weights;
@@ -9,11 +11,13 @@ public class Neuron {
     private double output;
     private double inputSum;
     private double delta;
+    private final ActivationFunction activationFunction;
 
     private static final Random rand = new Random();
 
-    public Neuron(int inputSize) {
+    public Neuron(int inputSize, final ActivationFunction activationFunction) {
         this.inputSize = inputSize;
+        this.activationFunction = activationFunction;
         initializeWeightsAndBias();
     }
 

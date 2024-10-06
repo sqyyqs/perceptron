@@ -2,8 +2,6 @@ package com.sqy;
 
 import java.util.*;
 
-import com.sqy.activasion.Activation;
-
 public class MLP {
     private int inputSize;
     private List<Integer> hiddenSizes;

@@ -1,8 +1,8 @@
 package com.sqy.activasion;
 
-public interface Activation {
-    double[][] apply(double[][] x);
-    double[][] applyDerivative(double[][] x) ;
+public interface ActivationFunction {
+    double apply(double value);
+    double applyDerivative(double value);
 
     default double crossEntropyLoss(double[][] predictions, double[][] labels) {
         int rows = predictions.length;
