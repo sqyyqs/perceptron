@@ -3,12 +3,11 @@ package com.sqy.test;
 import java.util.*;
 
 public class MLP {
-    private List<Layer> layers;
-    private double learningRate;
+    private final List<Layer> layers = new ArrayList<>();
+    private final double learningRate;
 
     public MLP(int inputSize, int[] hiddenLayerSizes, int outputSize, double learningRate) {
         this.learningRate = learningRate;
-        layers = new ArrayList<>();
 
         int previousSize = inputSize;
         for (int size : hiddenLayerSizes) {
@@ -27,11 +26,10 @@ public class MLP {
         return output;
     }
 
-    public void backpropagate(double[] inputs, int targetLabel) {
+    public double[] backpropagate(double[] inputs, int targetLabel) {
         // Forward pass
         double[] outputs = forward(inputs);
 
-        // Initialize deltas list
         List<double[]> deltas = new ArrayList<>();
 
         // Compute delta for output layer (assuming softmax and cross-entropy loss)
@@ -84,24 +82,19 @@ public class MLP {
             // Set input for next layer
             layerInput = layer.getOutputs();
         }
+
+        return outputs;
     }
 
     public void train(List<InputData> dataset, int epochs) {
-        for (int epoch = 0; epoch < epochs; epoch++) {
+        for (int epoch = 1; epoch < epochs; epoch++) {
             double totalLoss = 0.0;
             Collections.shuffle(dataset);
             for (InputData inputData : dataset) {
-                double[] data = inputData.data();
-                backpropagate(data, ClassLabelMapping.from(inputData));
-                double[] predicted = forward(data);
-                totalLoss += computeLoss(predicted, ClassLabelMapping.from(inputData));
+                double[] backpropagationData = backpropagate( inputData.data(), ClassLabelMapping.from(inputData));
+                totalLoss += computeLoss(backpropagationData, ClassLabelMapping.from(inputData));
             }
-            System.out.println("Epoch " + (epoch + 1) + " - Loss: " + (totalLoss / dataset.size()));
-            // try {
-                // Thread.sleep(500);
-            // } catch (InterruptedException e) {
-            //     throw new RuntimeException(e);
-            // }
+            System.out.println("Epoch " + epoch + " - Loss: " + (totalLoss / dataset.size()));
         }
     }
 
