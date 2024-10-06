@@ -3,19 +3,13 @@ package com.sqy.test;
 import java.util.*;
 
 public class MLP {
-    private int inputSize;
-    private int outputSize;
     private List<Layer> layers;
     private double learningRate;
 
-    // Constructor
     public MLP(int inputSize, int[] hiddenLayerSizes, int outputSize, double learningRate) {
-        this.inputSize = inputSize;
-        this.outputSize = outputSize;
         this.learningRate = learningRate;
         layers = new ArrayList<>();
 
-        // Initialize hidden layers
         int previousSize = inputSize;
         for (int size : hiddenLayerSizes) {
             layers.add(new Layer(previousSize, size));
@@ -25,7 +19,6 @@ public class MLP {
         layers.add(new Layer(previousSize, outputSize));
     }
 
-    // Forward pass: propagate inputs through all layers
     public double[] forward(double[] inputs) {
         double[] output = inputs;
         for (Layer layer : layers) {
@@ -34,7 +27,6 @@ public class MLP {
         return output;
     }
 
-    // Backward pass: compute deltas and update weights
     public void backpropagate(double[] inputs, int targetLabel) {
         // Forward pass
         double[] outputs = forward(inputs);
@@ -94,22 +86,21 @@ public class MLP {
         }
     }
 
-    public void train(double[][] inputs, int[] targetLabels, int epochs) {
+    public void train(List<InputData> dataset, int epochs) {
         for (int epoch = 0; epoch < epochs; epoch++) {
             double totalLoss = 0.0;
-            for (int i = 0; i < inputs.length; i++) {
-                backpropagate(inputs[i], targetLabels[i]);
-                double[] predicted = forward(inputs[i]);
-                totalLoss += computeLoss(predicted, targetLabels[i]);
+            Collections.shuffle(dataset);
+            for (InputData inputData : dataset) {
+                double[] data = inputData.data();
+                backpropagate(data, ClassLabelMapping.from(inputData));
+                double[] predicted = forward(data);
+                totalLoss += computeLoss(predicted, ClassLabelMapping.from(inputData));
             }
-            try {
-                System.out.println("Epoch " + (epoch + 1) + " - Loss: " + (totalLoss / inputs.length));
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            // if ((epoch + 1) % 100 == 0 || epoch == 0) {
-            //     System.out.println("Epoch " + (epoch + 1) + " - Loss: " + (totalLoss / inputs.length));
+            System.out.println("Epoch " + (epoch + 1) + " - Loss: " + (totalLoss / dataset.size()));
+            // try {
+                // Thread.sleep(500);
+            // } catch (InterruptedException e) {
+            //     throw new RuntimeException(e);
             // }
         }
     }
@@ -127,13 +118,14 @@ public class MLP {
     public int predict(double[] inputs) {
         double[] outputs = forward(inputs);
         int predictedLabel = 0;
-        double max = outputs[0];
+        double max = Double.MIN_VALUE;
         for (int i = 1; i < outputs.length; i++) {
             if (outputs[i] > max) {
                 max = outputs[i];
                 predictedLabel = i;
             }
         }
+        System.out.println(predictedLabel);
         return predictedLabel;
     }
 }
