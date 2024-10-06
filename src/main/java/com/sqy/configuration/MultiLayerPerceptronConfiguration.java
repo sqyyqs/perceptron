@@ -8,4 +8,6 @@ import com.sqy.loss.LossFunction;
 public final class MultiLayerPerceptronConfiguration {
     public static final ActivationFunction defaultActivationFunction = new SigmoidActivationFunctionFunction();
     public static final LossFunction defaultLossFunction = new CrossEntropyLossFunction();
+
+    public static final int EPOCH_COUNT = 10;
 }

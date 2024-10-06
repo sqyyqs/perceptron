@@ -2,20 +2,20 @@ package com.sqy.core;
 
 import java.util.*;
 
+import com.sqy.configuration.MultiLayerPerceptronConfiguration;
 import com.sqy.domain.ClassLabelMapping;
 import com.sqy.domain.InputData;
 import com.sqy.loss.LossFunction;
+import com.sqy.metrics.Metrics;
+import com.sqy.metrics.MetricsBuilder;
 
 public class MultiLayerPerceptron {
     private final List<Layer> layers = new ArrayList<>();
     private final double learningRate;
     private final LossFunction lossFunction;
 
-    public MultiLayerPerceptron(int inputSize,
-                                int[] hiddenLayerSizes,
-                                int outputSize,
-                                double learningRate,
-                                LossFunction lossFunction) {
+    public MultiLayerPerceptron(int inputSize, int[] hiddenLayerSizes, int outputSize,
+                                double learningRate, LossFunction lossFunction) {
         this.learningRate = learningRate;
         this.lossFunction = lossFunction;
 
@@ -28,6 +28,10 @@ public class MultiLayerPerceptron {
         layers.add(new Layer(previousSize, outputSize));
     }
 
+    public MultiLayerPerceptron(int inputSize, int[] hiddenLayerSizes, int outputSize, double learningRate) {
+        this(inputSize, hiddenLayerSizes, outputSize, learningRate, MultiLayerPerceptronConfiguration.defaultLossFunction);
+    }
+
     public double[] forward(double[] inputs) {
         double[] output = inputs;
         for (Layer layer : layers) {
@@ -36,7 +40,7 @@ public class MultiLayerPerceptron {
         return output;
     }
 
-    public void backpropagate(int targetLabel, double[] inputs) {
+    public void backpropagation(int targetLabel, double[] inputs) {
         layers.getLast().computeOutputDeltas(targetLabel);
 
         for (int l = layers.size() - 2; l >= 0; l--) {
@@ -52,17 +56,28 @@ public class MultiLayerPerceptron {
         }
     }
 
-    public void train(List<InputData> dataset, int epochs) {
-        for (int epoch = 1; epoch <= epochs; epoch++) {
+    public void train(List<InputData> dataset) {
+        MetricsBuilder metricsBuilder = new MetricsBuilder();
+        for (int epoch = 1; epoch <= MultiLayerPerceptronConfiguration.EPOCH_COUNT; epoch++) {
             double totalLoss = 0.0;
+
             Collections.shuffle(dataset);
+            System.out.printf("Epoch %d: \n", epoch);
+
             for (InputData inputData : dataset) {
                 double[] inputs = inputData.data();
                 forward(inputs);
-                backpropagate(ClassLabelMapping.from(inputData), inputs);
+                backpropagation(ClassLabelMapping.from(inputData), inputs);
+
+                int guess = maxIdx(layers.getLast().getOutputs());
+                metricsBuilder.addValue(layers.getLast().getOutputs(), guess);
+
                 totalLoss += computeLoss(ClassLabelMapping.from(inputData));
             }
-            System.out.println("Epoch " + epoch + " - Loss: " + (totalLoss / dataset.size()));
+            metricsBuilder.addLossFunctionValue(totalLoss);
+            Metrics metrics = metricsBuilder.createMetrics();
+            System.out.println(metrics.formatMetrics());
+            metricsBuilder.clear();
         }
     }
 
@@ -73,12 +88,15 @@ public class MultiLayerPerceptron {
     }
 
     public int predict(double[] inputs) {
-        double[] outputs = forward(inputs);
+        return maxIdx(forward(inputs));
+    }
+
+    private static int maxIdx(double[] arr) {
         int predictedLabel = 0;
         double max = Double.MIN_VALUE;
-        for (int i = 1; i < outputs.length; i++) {
-            if (outputs[i] > max) {
-                max = outputs[i];
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] > max) {
+                max = arr[i];
                 predictedLabel = i;
             }
         }

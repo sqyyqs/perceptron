@@ -3,7 +3,13 @@ package com.sqy.core;
 import java.util.*;
 
 import com.sqy.activasion.ActivationFunction;
+import com.sqy.configuration.MultiLayerPerceptronConfiguration;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Neuron {
     private int inputSize;
     private double[] weights;
@@ -12,13 +18,16 @@ public class Neuron {
     private double inputSum;
     private double delta;
     private final ActivationFunction activationFunction;
-
     private static final Random rand = new Random();
 
     public Neuron(int inputSize, final ActivationFunction activationFunction) {
         this.inputSize = inputSize;
         this.activationFunction = activationFunction;
         initializeWeightsAndBias();
+    }
+
+    public Neuron(int inputSize) {
+        this(inputSize, MultiLayerPerceptronConfiguration.defaultActivationFunction);
     }
 
     private void initializeWeightsAndBias() {
@@ -55,53 +64,5 @@ public class Neuron {
             weights[i] -= learningRate * delta * inputs[i];
         }
         bias -= learningRate * delta;
-    }
-
-    public int getInputSize() {
-        return inputSize;
-    }
-
-    public void setInputSize(final int inputSize) {
-        this.inputSize = inputSize;
-    }
-
-    public double[] getWeights() {
-        return weights;
-    }
-
-    public void setWeights(final double[] weights) {
-        this.weights = weights;
-    }
-
-    public double getBias() {
-        return bias;
-    }
-
-    public void setBias(final double bias) {
-        this.bias = bias;
-    }
-
-    public double getOutput() {
-        return output;
-    }
-
-    public void setOutput(final double output) {
-        this.output = output;
-    }
-
-    public double getInputSum() {
-        return inputSum;
-    }
-
-    public void setInputSum(final double inputSum) {
-        this.inputSum = inputSum;
-    }
-
-    public double getDelta() {
-        return delta;
-    }
-
-    public void setDelta(final double delta) {
-        this.delta = delta;
     }
 }

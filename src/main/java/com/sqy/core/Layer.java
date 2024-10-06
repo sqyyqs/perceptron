@@ -2,8 +2,6 @@ package com.sqy.core;
 
 import java.util.*;
 
-import com.sqy.configuration.MultiLayerPerceptronConfiguration;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +18,7 @@ public class Layer {
         this.outputSize = outputSize;
         neurons = new ArrayList<>();
         for (int i = 0; i < outputSize; i++) {
-            neurons.add(new Neuron(inputSize, MultiLayerPerceptronConfiguration.defaultActivationFunction));
+            neurons.add(new Neuron(inputSize));
         }
     }
 
