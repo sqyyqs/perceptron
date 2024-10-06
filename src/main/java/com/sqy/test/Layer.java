@@ -18,17 +18,28 @@ public class Layer {
     }
 
     public double[] forward(double[] inputs) {
-        outputs = new double[outputSize];
-        for (int i = 0; i < outputSize; i++) {
-            outputs[i] = neurons.get(i).forward(inputs);
+        outputs = new double[neurons.size()];
+        for (int i = 0; i < neurons.size(); i++) {
+            outputs[i] = neurons.get(i).activate(inputs);
         }
         return outputs;
     }
 
-    public void updateWeights(double[] inputs, double learningRate) {
-        for (Neuron neuron : neurons) {
-            neuron.updateWeights(inputs, learningRate);
+    public void computeOutputDeltas(int targetLabel) {
+        for (int i = 0; i < neurons.size(); i++) {
+            double target = (i == targetLabel) ? 1.0 : 0.0;
+            neurons.get(i).computeOutputDelta(target);
         }
+    }
+
+    public void computeHiddenDeltas(Layer nextLayer) {
+        for (int i = 0; i < neurons.size(); i++) {
+            neurons.get(i).computeHiddenDelta(nextLayer.getNeurons(), i);
+        }
+    }
+
+    public void updateWeights(double[] inputs, double learningRate) {
+        neurons.forEach(neuron -> neuron.updateWeights(inputs, learningRate));
     }
 
     public int getInputSize() {

@@ -27,60 +27,22 @@ public class MLP {
     }
 
     public double[] backpropagate(double[] inputs, int targetLabel) {
-        // Forward pass
         double[] outputs = forward(inputs);
 
-        List<double[]> deltas = new ArrayList<>();
+        layers.getLast().computeOutputDeltas(targetLabel);
 
-        // Compute delta for output layer (assuming softmax and cross-entropy loss)
-        // For simplicity, we'll use sigmoid activation here as per previous implementation
-        // Modify accordingly if using softmax
-
-        Layer outputLayer = layers.getLast();
-        double[] outputDeltas = new double[outputLayer.getOutputSize()];
-        for (int i = 0; i < outputLayer.getOutputSize(); i++) {
-            double target = (i == targetLabel) ? 1.0 : 0.0;
-            // Assuming sigmoid activation
-            outputDeltas[i] = outputs[i] - target;
-        }
-        deltas.add(outputDeltas);
-
-        // Compute deltas for hidden layers
+        // Compute deltas for hidden layers in reverse order
         for (int l = layers.size() - 2; l >= 0; l--) {
             Layer currentLayer = layers.get(l);
             Layer nextLayer = layers.get(l + 1);
-            double[] currentDeltas = new double[currentLayer.getOutputSize()];
-
-            for (int i = 0; i < currentLayer.getOutputSize(); i++) {
-                double sum = 0.0;
-                for (int j = 0; j < nextLayer.getOutputSize(); j++) {
-                    Neuron nextNeuron = nextLayer.getNeurons().get(j);
-                    sum += nextNeuron.getWeights()[i] * deltas.getFirst()[j];
-                }
-                // Assuming sigmoid activation
-                double output = currentLayer.getNeurons().get(i).getOutput();
-                currentDeltas[i] = sum * output * (1 - output);
-            }
-            deltas.addFirst(currentDeltas); // Insert at the beginning
+            currentLayer.computeHiddenDeltas(nextLayer);
         }
 
-        // Update weights and biases for all layers
-        double[] layerInput = inputs;
-        for (int l = 0; l < layers.size(); l++) {
-            Layer layer = layers.get(l);
-            double[] layerDeltas = deltas.get(l);
-            // Update each neuron in the layer
-            for (int n = 0; n < layer.getOutputSize(); n++) {
-                Neuron neuron = layer.getNeurons().get(n);
-                // Update weights
-                for (int w = 0; w < neuron.getWeights().length; w++) {
-                    neuron.getWeights()[w] -= learningRate * layerDeltas[n] * layerInput[w];
-                }
-                // Update bias
-                neuron.setBias(neuron.getBias() - learningRate * layerDeltas[n]);
-            }
-            // Set input for next layer
-            layerInput = layer.getOutputs();
+        // Update weights and biases layer by layer
+        double[] layerInputs = inputs;
+        for (Layer layer : layers) {
+            layer.updateWeights(layerInputs, learningRate);
+            layerInputs = layer.getOutputs();
         }
 
         return outputs;

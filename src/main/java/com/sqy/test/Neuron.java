@@ -4,11 +4,11 @@ import java.util.*;
 
 public class Neuron {
     private int inputSize;
-    private double[] weights; // weights[input]
+    private double[] weights;
     private double bias;
-    private double output;     // Output after activation
-    private double inputSum;   // Weighted sum before activation
-    private double delta;      // Error term for backpropagation
+    private double output;
+    private double inputSum;
+    private double delta;
 
     private static final Random rand = new Random();
 
@@ -25,38 +25,37 @@ public class Neuron {
         bias = 0.0;
     }
 
+    public double activate(double[] inputs) {
+        double z = bias;
+        for (int i = 0; i < weights.length; i++) {
+            z += weights[i] * inputs[i];
+        }
+        output = sigmoid(z);
+        return output;
+    }
+
     private double sigmoid(double x) {
         return 1.0 / (1.0 + Math.exp(-x));
     }
 
-    private double sigmoidDerivative(double x) {
-        return x * (1.0 - x);
-    }
-
-    public double forward(double[] inputs) {
-        inputSum = 0.0;
-        for (int i = 0; i < inputSize; i++) {
-            inputSum += weights[i] * inputs[i];
-        }
-        inputSum += bias;
-        output = sigmoid(inputSum);
-        return output;
+    private double sigmoidDerivative() {
+        return output * (1 - output);
     }
 
     public void computeOutputDelta(double target) {
         delta = output - target;
     }
 
-    public void computeHiddenDelta(double[] nextLayerWeights, double[] nextLayerDeltas) {
+    public void computeHiddenDelta(List<Neuron> nextLayerNeurons, int index) {
         double sum = 0.0;
-        for (int i = 0; i < nextLayerDeltas.length; i++) {
-            sum += nextLayerWeights[i] * nextLayerDeltas[i];
+        for (Neuron neuron : nextLayerNeurons) {
+            sum += neuron.getWeights()[index] * neuron.getDelta();
         }
-        delta = sum * sigmoidDerivative(output);
+        delta = sum * sigmoidDerivative();
     }
 
     public void updateWeights(double[] inputs, double learningRate) {
-        for (int i = 0; i < inputSize; i++) {
+        for (int i = 0; i < weights.length; i++) {
             weights[i] -= learningRate * delta * inputs[i];
         }
         bias -= learningRate * delta;
