@@ -26,35 +26,31 @@ public class MLP {
         return output;
     }
 
-    public double[] backpropagate(double[] inputs, int targetLabel) {
-        double[] outputs = forward(inputs);
-
+    public void backpropagate(int targetLabel, double[] inputs) {
         layers.getLast().computeOutputDeltas(targetLabel);
 
-        // Compute deltas for hidden layers in reverse order
         for (int l = layers.size() - 2; l >= 0; l--) {
             Layer currentLayer = layers.get(l);
             Layer nextLayer = layers.get(l + 1);
             currentLayer.computeHiddenDeltas(nextLayer);
         }
 
-        // Update weights and biases layer by layer
         double[] layerInputs = inputs;
         for (Layer layer : layers) {
             layer.updateWeights(layerInputs, learningRate);
             layerInputs = layer.getOutputs();
         }
-
-        return outputs;
     }
 
     public void train(List<InputData> dataset, int epochs) {
-        for (int epoch = 1; epoch < epochs; epoch++) {
+        for (int epoch = 1; epoch <= epochs; epoch++) {
             double totalLoss = 0.0;
             Collections.shuffle(dataset);
             for (InputData inputData : dataset) {
-                double[] backpropagationData = backpropagate( inputData.data(), ClassLabelMapping.from(inputData));
-                totalLoss += computeLoss(backpropagationData, ClassLabelMapping.from(inputData));
+                double[] inputs = inputData.data();
+                double[] outputs = forward(inputs);
+                backpropagate(ClassLabelMapping.from(inputData), inputs);
+                totalLoss += computeLoss(outputs, ClassLabelMapping.from(inputData));
             }
             System.out.println("Epoch " + epoch + " - Loss: " + (totalLoss / dataset.size()));
         }
@@ -64,7 +60,6 @@ public class MLP {
         double loss = 0.0;
         for (int i = 0; i < predicted.length; i++) {
             double target = (i == targetLabel) ? 1.0 : 0.0;
-            // To prevent log(0)
             loss -= target * Math.log(predicted[i] + 1e-15) + (1 - target) * Math.log(1 - predicted[i] + 1e-15);
         }
         return loss;
@@ -80,7 +75,6 @@ public class MLP {
                 predictedLabel = i;
             }
         }
-        System.out.println(predictedLabel);
         return predictedLabel;
     }
 }

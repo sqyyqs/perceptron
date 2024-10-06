@@ -19,8 +19,9 @@ public class Main {
         mlp.train(dataSet, epochs);
 
         InputData inputData = dataSet.get(ThreadLocalRandom.current().nextInt(dataSet.size()));
-        mlp.predict(inputData.data());
+        int predict = mlp.predict(inputData.data());
         System.out.println(ClassLabelMapping.from(inputData));
+        System.out.println(predict);
     }
 
     private static List<InputData> loadTrainingInputs() {
