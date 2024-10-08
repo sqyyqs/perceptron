@@ -74,8 +74,7 @@ public class MultiLayerPerceptron {
 
                 totalLoss += computeLoss(ClassLabelMapping.from(inputData));
             }
-            metricsBuilder.addLossFunctionValue(totalLoss);
-            Metrics metrics = metricsBuilder.createMetrics();
+            Metrics metrics = metricsBuilder.addLossFunctionValue(totalLoss / dataset.size()).createMetrics();
             System.out.println(metrics.formatMetrics());
             metricsBuilder.clear();
         }

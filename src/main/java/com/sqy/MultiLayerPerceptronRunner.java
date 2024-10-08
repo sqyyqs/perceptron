@@ -3,15 +3,17 @@ package com.sqy;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.sqy.configuration.MultiLayerPerceptronConfiguration;
 import com.sqy.core.MultiLayerPerceptron;
-import com.sqy.metrics.MetricsBuilder;
-import com.sqy.util.MatrixCsvLoader;
 import com.sqy.domain.ClassLabelMapping;
 import com.sqy.domain.InputData;
+import com.sqy.util.MatrixCsvLoader;
 
 public class MultiLayerPerceptronRunner {
     public static void main(String[] args) {
+        run();
+    }
+
+    public static void run() {
         int inputSize = 32 * 32;
         int[] hiddenLayerSizes = { 128, 64 };
         int outputSize = 10;
