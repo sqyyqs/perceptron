@@ -1,24 +1,19 @@
 package com.sqy.ui;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntFunction;
 
 import com.sqy.MultiLayerPerceptronRunner;
-import com.sqy.core.MultiLayerPerceptron;
+import com.sqy.metrics.Metrics;
 
 import javafx.application.Application;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -26,32 +21,41 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class ApplicationFrame extends Application {
-
-
-
+    private static final int PIXELS = 16;
+    private final MultiLayerPerceptronRunner multiLayerPerceptronRunner = new MultiLayerPerceptronRunner();
+    private final TextArea textArea = new TextArea();
+    private final PixelCanva pixelCanva = new PixelCanva(512, 512);
+    private final Slider valueSlider = new Slider(5, 20, 10);
+    private final Label sliderValueLabel = new Label("Количество эпох: " + (int) valueSlider.getValue());
 
     @Override
     public void start(Stage primaryStage) {
-        PixelCanva pixelCanva = new PixelCanva(512, 512);
-        pixelCanva.drawGrid(16, Color.LIGHTGRAY);
+        pixelCanva.drawGrid(PIXELS, Color.LIGHTGRAY);
 
-        Consumer<Integer> firstCallback = (value) -> {
-            System.out.println("First button pressed, value: " + value);
-        };
+        valueSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            sliderValueLabel.setText("Value: " + newValue.intValue());
+        });
 
-        Runnable secondCallback = () -> {
-            System.out.println("Second button pressed!");
-        };
-
+        IntFunction<List<Metrics>> trainConsumer = multiLayerPerceptronRunner::train;
+        DoubleSupplier testSupplier = multiLayerPerceptronRunner::test;
 
         BorderPane root = new BorderPane();
-        root.setTop(topControls(pixelCanva, firstCallback, secondCallback));
         StackPane canvasContainer = new StackPane(pixelCanva);
+
+        valueSlider.setShowTickLabels(true);
+        valueSlider.setShowTickMarks(true);
+        valueSlider.setMajorTickUnit(5);
+        valueSlider.setBlockIncrement(5);
+
+        textArea.setPrefHeight(125);
+        textArea.setEditable(false);
+
+        root.setTop(topControls(trainConsumer, testSupplier));
         root.setCenter(canvasContainer);
+        root.setBottom(textArea);
+        Scene scene = new Scene(root, 1200, 800);
 
-        Scene scene = new Scene(root, 1000, 700);
-
-        primaryStage.setTitle("Pixel Painting Canvas with Slider and Callbacks");
+        primaryStage.setTitle("перцептрончик на джаве");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -60,47 +64,54 @@ public class ApplicationFrame extends Application {
         launch(args);
     }
 
-    private HBox topControls(PixelCanva pixelCanva, Consumer<Integer> sliderButtonCallback, Runnable secondButtonCallback) {
+    private HBox topControls(IntFunction<List<Metrics>> intConsumer, DoubleSupplier secondButtonCallback) {
         ColorPicker colorPicker = new ColorPicker();
-        colorPicker.setValue(Color.BLACK);  // Default color
+        colorPicker.setValue(Color.BLACK);
         colorPicker.setOnAction(event -> pixelCanva.setCurrentColor(colorPicker.getValue()));
 
-        Slider valueSlider = new Slider(5, 20, 50);
-        valueSlider.setShowTickLabels(true);
-        valueSlider.setShowTickMarks(true);
-        valueSlider.setMajorTickUnit(5);
-        valueSlider.setBlockIncrement(5);
+        Button transformButton = predictImageButton();
+        Button testButton = testButton(secondButtonCallback);
+        Button trainButton = trainButton(intConsumer);
+        Button clearButton = clearButton();
 
-        Label sliderValueLabel = new Label("Количество эпох: " + (int) valueSlider.getValue());
+        return new HBox(10, colorPicker, valueSlider, sliderValueLabel, trainButton, testButton, transformButton, clearButton);
+    }
 
-        valueSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            sliderValueLabel.setText("Value: " + newValue.intValue());
-        });
-
-        Button transformButton = new Button("Распознать изображение");
-        transformButton.setOnAction(event -> {
+    private Button predictImageButton() {
+        Button predictImageButton = new Button("Распознать изображение");
+        predictImageButton.setOnAction(event -> {
             double[] canvasData = pixelCanva.transformCanvasToDoubleArray();
-
-            System.out.println(Arrays.toString(canvasData));
-            System.out.println(canvasData.length);
+            char predict = multiLayerPerceptronRunner.predict(canvasData);
+            textArea.setText(predict + "");
         });
+        return predictImageButton;
+    }
 
-        Button button1 = new Button("Тренировать");
-        button1.setOnAction(event -> {
-            int sliderValue = (int) valueSlider.getValue();
-            sliderButtonCallback.accept(sliderValue);
-        });
-
-        Button clearButton = new Button("Очистить холст");
+    private Button clearButton() {
+        Button clearButton = new Button("Очистить");
         clearButton.setOnAction(event -> {
             pixelCanva.clearCanvas();
-            pixelCanva.drawGrid(10, Color.LIGHTGRAY);
+            pixelCanva.drawGrid(PIXELS, Color.LIGHTGRAY);
+            textArea.clear();
         });
+        return clearButton;
+    }
 
-        Button button2 = new Button("Call Second Callback");
-        button2.setOnAction(event -> secondButtonCallback.run());
+    private Button trainButton(IntFunction<List<Metrics>> intConsumer) {
+        Button trainButton = new Button("Тренировать");
+        trainButton.setOnAction(event -> {
+            int sliderValue = (int) valueSlider.getValue();
+            List<Metrics> metrics = intConsumer.apply(sliderValue);
+            metrics.forEach(metric -> textArea.appendText(metric.formatMetrics() + '\n'));
+        });
+        return trainButton;
+    }
 
-       return new HBox(10, colorPicker, valueSlider, sliderValueLabel, button1, button2, transformButton, clearButton);
+    private Button testButton(DoubleSupplier doubleSupplier) {
+        Button testButton = new Button("Прогнать тренировочную выборку");
+        testButton.setOnAction(event -> textArea.setText(
+            "Результат распознавания тренировочной выборки: %.3f%%\n".formatted(doubleSupplier.getAsDouble() * 100)));
+        return testButton;
     }
 }
 

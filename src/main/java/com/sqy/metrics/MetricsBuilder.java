@@ -10,7 +10,7 @@ public class MetricsBuilder {
     public MetricsBuilder addValue(double[] predicted, int targetLabel) {
         for (int i = 0; i < predicted.length; i++) {
             double predictedValue = predicted[i];
-            if (predictedValue > 0.5) {
+            if (predictedValue > 0.50) {
                 if (i == targetLabel) {
                     truePositive++;
                 } else {
@@ -45,7 +45,6 @@ public class MetricsBuilder {
         double recall = MetricFunctions.recall(truePositive, falseNegative);
         double accuracy = MetricFunctions.accuracy(truePositive, falsePositive, falseNegative, trueNegative);
         double precision = MetricFunctions.precision(truePositive, falsePositive);
-
         return new Metrics(accuracy, precision, recall, lossFunctionValue);
     }
 

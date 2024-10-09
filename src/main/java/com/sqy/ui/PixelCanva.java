@@ -8,11 +8,10 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class PixelCanva extends Canvas {
-
     private int width;
     private int height;
-    private Color currentColor = Color.BLACK;  // Default paint color
-    private int pixelSize = 10;  // Size of each "paint" pixel
+    private Color currentColor = Color.BLACK;
+    private int pixelSize = 10;
 
     public PixelCanva(int width, int height) {
         super(width, height);
@@ -22,32 +21,26 @@ public class PixelCanva extends Canvas {
         enablePainting();
     }
 
-    // Set the color of a specific pixel
     public void setPixel(int x, int y, Color color) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
-            GraphicsContext gc = getGraphicsContext2D();
-            gc.getPixelWriter().setColor(x, y, color);
+            getGraphicsContext2D().getPixelWriter().setColor(x, y, color);
         }
     }
 
-    // Clear the canvas and fill it with a background color
     public void clearCanvas() {
         GraphicsContext gc = getGraphicsContext2D();
 
-        gc.setFill(Color.WHITE);  // You can choose any background color
+        gc.setFill(Color.WHITE);
         gc.fillRect(0, 0, width, height);
     }
 
-    // Enable mouse painting functionality
     private void enablePainting() {
-        // Handle mouse pressed (initial click)
         addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
-            paint(event.getX(), event.getY());  // Use getX() and getY() to get mouse position
+            paint(event.getX(), event.getY());
         });
 
-        // Handle mouse dragged (drag to paint)
         addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
-            paint(event.getX(), event.getY());  // Use getX() and getY() to get mouse position
+            paint(event.getX(), event.getY());
         });
     }
 
